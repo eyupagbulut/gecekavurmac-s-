@@ -1,22 +1,37 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMenu } from '../context/MenuContext';
 import { Product, ProductVariant } from '../types';
 import { 
   LayoutDashboard, Package, Settings, LogOut, 
   TrendingUp, Users, DollarSign, Edit, Trash2, 
   Plus, Save, Upload, Image as ImageIcon, X,
-  Star, MessageSquare, ThumbsUp, ThumbsDown
+  Star, MessageSquare, ThumbsUp, ThumbsDown,
+  Sliders, Store
 } from 'lucide-react';
+import { GoogleWorkspacePanel } from './GoogleWorkspacePanel';
 
 interface AdminProps {
   onLogout: () => void;
 }
 
 export const AdminPanel: React.FC<AdminProps> = ({ onLogout }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'bulk-edit' | 'feedback'>('dashboard');
-  const { products, deleteProduct, addProduct, updateProduct, bulkUpdatePrices, report, submittedRatings } = useMenu();
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'bulk-edit' | 'feedback' | 'google-workspace' | 'settings'>('dashboard');
+  const { products, deleteProduct, addProduct, updateProduct, bulkUpdatePrices, report, submittedRatings, settings, updateSettings } = useMenu();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Restaurant settings state
+  const [tempSettings, setTempSettings] = useState(settings);
+
+  useEffect(() => {
+    setTempSettings(settings);
+  }, [settings]);
+
+  const handleSaveSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSettings(tempSettings);
+    alert("Ayarlar başarıyla kaydedildi!");
+  };
 
   // Bulk Edit State
   const [bulkPrices, setBulkPrices] = useState<{[key: string]: string}>({});
@@ -45,7 +60,7 @@ export const AdminPanel: React.FC<AdminProps> = ({ onLogout }) => {
       <div className="w-64 bg-gray-900 text-white flex flex-col">
         <div className="p-6 border-b border-gray-800">
           <h2 className="text-xl font-bold">Yönetici Paneli</h2>
-          <p className="text-xs text-gray-500">Kavurmacı Kadıköy</p>
+          <p className="text-xs text-gray-500">Kavurmacı Fikirtepe</p>
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
@@ -77,6 +92,20 @@ export const AdminPanel: React.FC<AdminProps> = ({ onLogout }) => {
             <MessageSquare size={20} />
             <span>Geri Bildirimler</span>
           </button>
+          <button 
+            onClick={() => setActiveTab('google-workspace')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition ${activeTab === 'google-workspace' ? 'bg-brand-600 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
+          >
+            <Store size={20} />
+            <span>Google Workspace</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition ${activeTab === 'settings' ? 'bg-brand-600 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
+          >
+            <Sliders size={20} />
+            <span>Ayarlar</span>
+          </button>
         </nav>
 
         <div className="p-4 border-t border-gray-800">
@@ -95,6 +124,8 @@ export const AdminPanel: React.FC<AdminProps> = ({ onLogout }) => {
             {activeTab === 'products' && 'Ürünleri Düzenle'}
             {activeTab === 'bulk-edit' && 'Toplu Fiyat Güncelleme'}
             {activeTab === 'feedback' && 'Müdavim Lezzet Karneleri & Geri Bildirimler'}
+            {activeTab === 'google-workspace' && 'Google Workspace Entegrasyonu'}
+            {activeTab === 'settings' && 'İşletme Ayarları'}
           </h1>
           <div className="text-sm text-gray-500">Admin: Yetkili</div>
         </header>
@@ -369,6 +400,78 @@ export const AdminPanel: React.FC<AdminProps> = ({ onLogout }) => {
               </div>
             </div>
           )}
+
+          {activeTab === 'google-workspace' && (
+            <GoogleWorkspacePanel />
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-2xl text-left">
+               <h3 className="text-lg font-bold text-gray-800 mb-2">Restoran İşletme Ayarları</h3>
+               <p className="text-gray-500 text-sm mb-6">Müşteri arayüzünde görünen başlıklar, adresler, telefon numaraları ve çalışma saatlerini buradan güncelleyebilirsiniz.</p>
+               
+               <form onSubmit={handleSaveSettings} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Restoran Adı</label>
+                    <input 
+                      type="text" 
+                      value={tempSettings.restaurantName} 
+                      onChange={e => setTempSettings({...tempSettings, restaurantName: e.target.value})} 
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-sm" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">İletişim & Rezervasyon Telefonu</label>
+                      <input 
+                        type="tel" 
+                        value={tempSettings.phone} 
+                        onChange={e => setTempSettings({...tempSettings, phone: e.target.value})} 
+                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm font-mono" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Hafta İçi / Cumartesi Saatleri</label>
+                      <input 
+                        type="text" 
+                        value={tempSettings.workingHoursWeekday} 
+                        onChange={e => setTempSettings({...tempSettings, workingHoursWeekday: e.target.value})} 
+                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Pazar Günü Durumu</label>
+                      <input 
+                        type="text" 
+                        value={tempSettings.workingHoursSunday} 
+                        onChange={e => setTempSettings({...tempSettings, workingHoursSunday: e.target.value})} 
+                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">İşletme Adresi</label>
+                      <input 
+                        type="text" 
+                        value={tempSettings.address} 
+                        onChange={e => setTempSettings({...tempSettings, address: e.target.value})} 
+                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm" 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-5 flex justify-end">
+                    <button 
+                      type="submit" 
+                      className="bg-brand-600 text-white px-6 py-2.5 rounded-lg hover:bg-brand-700 font-bold flex items-center gap-2 text-sm shadow-md transition"
+                    >
+                      <Save size={18} /> Ayarları Kaydet
+                    </button>
+                  </div>
+               </form>
+            </div>
+          )}
         </main>
       </div>
 
@@ -416,6 +519,20 @@ export const AdminLogin: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
           </div>
           <button type="submit" className="w-full bg-brand-600 text-white py-3 rounded-lg font-bold hover:bg-brand-700">Giriş Yap</button>
         </form>
+        <div className="mt-4 border-t pt-4 text-center">
+          <p className="text-xs text-gray-400 mb-2">Kullanıcı adı: <span className="font-semibold text-gray-600">admin</span>, şifre: <span className="font-semibold text-gray-600">admin123</span></p>
+          <button 
+            onClick={() => {
+              setUser('admin');
+              setPass('admin123');
+              onLogin();
+            }}
+            type="button"
+            className="w-full text-xs bg-brand-50 text-brand-600 hover:bg-brand-100 font-bold py-2 px-4 rounded-xl transition"
+          >
+            🚀 Tek Tıkla Hızlı Giriş (Demo)
+          </button>
+        </div>
         <div className="mt-4 text-center text-xs text-gray-400">
            Maksimum 2 oturum izni.
         </div>
@@ -492,12 +609,27 @@ const ProductModal: React.FC<{ product: Product | null, onClose: () => void, onS
           
           <div>
             <label className="block text-sm font-medium mb-1">Resim</label>
-            <div className="flex items-center gap-4">
-              {formData.image && <img src={formData.image} className="w-20 h-20 object-cover rounded-lg border" />}
-              <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <Upload size={18} /> Bilgisayardan Yükle
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                {formData.image && <img src={formData.image} className="w-20 h-20 object-cover rounded-lg border bg-gray-50" />}
+                <div className="flex flex-col gap-2">
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-xs font-semibold">
+                    <Upload size={16} /> Bilgisayardan veya Mobilden Yükle
+                  </button>
+                  <p className="text-[10px] text-gray-400">Görsel dosyasını doğrudan cihazınızdan seçebilirsiniz.</p>
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Veya Resim İnternet Bağlantısı (URL)</label>
+                <input 
+                  type="text" 
+                  placeholder="https://example.com/resim.jpg" 
+                  value={formData.image} 
+                  onChange={e => setFormData({...formData, image: e.target.value})} 
+                  className="w-full p-2 border rounded text-xs" 
+                />
+              </div>
             </div>
           </div>
 
@@ -507,10 +639,12 @@ const ProductModal: React.FC<{ product: Product | null, onClose: () => void, onS
               <button onClick={addVariant} type="button" className="text-brand-600 text-sm hover:underline">+ Varyant Ekle</button>
             </div>
             {formData.variants.map((v, idx) => (
-              <div key={idx} className="flex gap-2 mb-2 items-center">
-                <input placeholder="Gramaj / İsim" value={v.weight} onChange={e => handleVariantChange(idx, 'weight', e.target.value)} className="flex-1 p-2 border rounded" />
-                <input type="number" placeholder="Fiyat" value={v.price} onChange={e => handleVariantChange(idx, 'price', parseFloat(e.target.value))} className="w-24 p-2 border rounded" />
-                <button onClick={() => removeVariant(idx)} className="text-red-500 hover:bg-red-50 p-2 rounded"><Trash2 size={16} /></button>
+              <div key={idx} className="flex flex-col md:flex-row gap-2 mb-3 pb-3 border-b border-gray-100 last:border-0 md:items-center">
+                <input placeholder="Gramaj / İsim" value={v.weight} onChange={e => handleVariantChange(idx, 'weight', e.target.value)} className="flex-1 p-2 border rounded text-sm" />
+                <input type="number" placeholder="Fiyat (₺)" value={v.price || ''} onChange={e => handleVariantChange(idx, 'price', parseFloat(e.target.value) || 0)} className="w-24 p-2 border rounded text-sm" />
+                <input type="number" placeholder="Kalori (kcal)" value={v.calories || ''} onChange={e => handleVariantChange(idx, 'calories', parseInt(e.target.value) || undefined)} className="w-28 p-2 border rounded text-sm" />
+                <input type="number" placeholder="Protein (g)" value={v.protein || ''} onChange={e => handleVariantChange(idx, 'protein', parseInt(e.target.value) || undefined)} className="w-28 p-2 border rounded text-sm" />
+                <button onClick={() => removeVariant(idx)} type="button" className="text-red-500 hover:bg-red-50 p-2 rounded shrink-0 self-end md:self-auto"><Trash2 size={16} /></button>
               </div>
             ))}
           </div>

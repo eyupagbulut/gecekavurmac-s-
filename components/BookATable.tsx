@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMenu } from '../context/MenuContext';
+import PILAV_KAVURMA_IMG from '../src/assets/images/pilav_ustu_kavurma_new_v2_1784501731312.jpg';
 import { 
   Calendar, 
   Clock, 
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const BookATable: React.FC = () => {
-  const { bookings, addBooking, cancelBooking, loyaltyProfile } = useMenu();
+  const { bookings, addBooking, cancelBooking, loyaltyProfile, settings } = useMenu();
 
   // Form State
   const [fullName, setFullName] = useState('');
@@ -72,6 +73,12 @@ export const BookATable: React.FC = () => {
     }
     if (!date) {
       setErrorMsg('Lütfen bir rezervasyon tarihi seçin.');
+      return;
+    }
+    // Check if Sunday
+    const selectedDate = new Date(date);
+    if (selectedDate.getDay() === 0) {
+      setErrorMsg('Üzgünüz, Pazar günleri kapalıyız. Lütfen Pazartesi-Cumartesi arası başka bir gün seçin.');
       return;
     }
     if (!timeSlot) {
@@ -390,6 +397,25 @@ export const BookATable: React.FC = () => {
             )}
           </div>
 
+          {/* Promo Card with Image */}
+          <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-3xl overflow-hidden shadow-sm">
+            <div className="relative h-44">
+              <img 
+                src={PILAV_KAVURMA_IMG} 
+                alt="Enfes Kavurma Lezzeti" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <span className="absolute top-3 left-3 bg-brand-600 text-white text-[10px] uppercase font-black px-2.5 py-1 rounded-lg">
+                🔥 Rezervasyon Özel
+              </span>
+              <div className="absolute bottom-3 left-3 right-3 text-white">
+                <h4 className="font-extrabold text-sm leading-tight">Yerinizi Şimdiden Ayırın</h4>
+                <p className="text-[10px] text-gray-200 mt-0.5 font-medium">Masasında sıcak fırın ekmeği eşliğinde esnaf usulü kavurma keyfi!</p>
+              </div>
+            </div>
+          </div>
+
           {/* Contact details & Opening Hours Card */}
           <div className="bg-brand-600 text-white p-6 rounded-3xl shadow-md relative overflow-hidden">
             <div className="absolute right-0 bottom-0 translate-x-12 translate-y-12 opacity-10">
@@ -399,24 +425,24 @@ export const BookATable: React.FC = () => {
             <h4 className="font-extrabold text-sm uppercase tracking-widest text-brand-100">Çalışma Saatleri</h4>
             <div className="mt-3.5 space-y-2 text-xs font-bold text-white/90">
               <div className="flex justify-between border-b border-brand-500/40 pb-2">
-                <span>Pazartesi - Cumartesi:</span>
-                <span className="font-mono">11:30 - 22:30</span>
+                <span>Pzt - Cmt:</span>
+                <span className="font-mono">{settings.workingHoursWeekday}</span>
               </div>
               <div className="flex justify-between border-b border-brand-500/40 pb-2">
                 <span>Pazar:</span>
-                <span className="font-mono">12:00 - 22:00</span>
+                <span className="font-mono">{settings.workingHoursSunday}</span>
               </div>
               <div className="flex justify-between pt-1">
                 <span>Adres:</span>
                 <span className="text-right max-w-[180px] text-[11px] leading-tight text-white/80">
-                  Fikirtepe Caddesi No: 12 Kadıköy, İstanbul
+                  {settings.address}
                 </span>
               </div>
             </div>
 
             <div className="mt-6 flex items-center justify-between text-[11px] bg-black/10 px-3.5 py-2.5 rounded-2xl border border-white/10">
               <span className="font-extrabold">📞 Rezervasyon Destek</span>
-              <span className="font-mono font-black">0216 555 00 00</span>
+              <span className="font-mono font-black">{settings.phone}</span>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 {
-  "name": "Kavurmacı Kadıköy",
-  "description": "Premium local food delivery service for Fikirtepe and Dumlupınar, specializing in traditional Turkish Kavurma and Pilav.",
+  "name": "Kavurmacı Fikirtepe",
+  "description": "Premium local food delivery service for Fikirtepe Merdivenköy and Yenitepe Business İstanbul, specializing in traditional Turkish Kavurma and Pilav.",
   "requestFramePermissions": [
     "geolocation"
   ],

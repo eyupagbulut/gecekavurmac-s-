@@ -24,7 +24,7 @@ interface OrderHistoryModalProps {
 }
 
 export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, onClose, onOpenCart }) => {
-  const { pastOrders, loyaltyProfile, addToCart, clearPastOrders } = useMenu();
+  const { pastOrders, loyaltyProfile, addToCart, clearPastOrders, addToast } = useMenu();
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -39,7 +39,12 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
       addToCart(item);
     });
 
-    alert("Siparişinizdeki lezzetler sepetinize eklendi! Hızla sepetinize yönlendiriliyorsunuz.");
+    addToast({
+      title: "Sipariş Tekrarlandı! 🛒",
+      message: "Önceki siparişinizdeki lezzetler sepetinize eklendi.",
+      type: 'success',
+      duration: 5000
+    });
     
     if (onOpenCart) {
       onOpenCart();
@@ -238,7 +243,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none block">Teslimat Bilgileri</span>
                               <p className="flex items-start gap-1">
                                 <MapPin size={13} className="text-gray-400 shrink-0 mt-0.5" />
-                                <span>{order.details.address}, {order.details.neighborhood} / Kadıköy</span>
+                                <span>{order.details.address}, {order.details.neighborhood} / Fikirtepe</span>
                               </p>
                               {order.details.note && (
                                 <p className="text-gray-500 italic mt-1 bg-white p-1.5 rounded border border-gray-100">

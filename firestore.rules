@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Entity Schema Validation Blueprints
+
+    function isValidUser(data) {
+      return data.fullName is string && data.fullName.size() <= 100
+        && data.phone is string && data.phone.size() <= 30
+        && (data.email == null || (data.email is string && data.email.size() <= 100))
+        && (data.points is int || data.points is float)
+        && (data.totalEarned is int || data.totalEarned is float)
+        && data.membershipTier is string
+        && data.history is list;
+    }
+
+    function isValidBooking(data) {
+      return data.fullName is string && data.fullName.size() <= 100
+        && data.phone is string && data.phone.size() <= 30
+        && (data.email == null || (data.email is string && data.email.size() <= 100))
+        && data.date is string
+        && data.timeSlot is string
+        && (data.guestsCount is int || data.guestsCount is float)
+        && (data.notes == null || (data.notes is string && data.notes.size() <= 1000))
+        && data.status is string
+        && (data.createdAt is int || data.createdAt is float);
+    }
+
+    function isValidOrder(data) {
+      return data.items is list
+        && (data.total is int || data.total is float)
+        && data.details is map
+        && data.status is string
+        && (data.createdAt is int || data.createdAt is float);
+    }
+
+    function isValidFeedback(data) {
+      return data.orderId is string && data.orderId.size() <= 128
+        && (data.rating is int || data.rating is float) && data.rating >= 1 && data.rating <= 5
+        && data.feedbackText is string && data.feedbackText.size() <= 1000
+        && data.highlights is list
+        && data.itemsFeedback is map
+        && (data.createdAt is int || data.createdAt is float);
+    }
+
+    // Collection Rules
+
+    // Users & Loyalty Profiles
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow delete: if false; // User deletion is restricted
+    }
+
+    // Bookings
+    match /bookings/{bookingId} {
+      allow get: if true; // Allow lookup by booking ID for confirmation
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidBooking(request.resource.data) 
+                    && (request.resource.data.userId == null 
+                        || request.resource.data.userId == 'anonymous' 
+                        || isOwner(request.resource.data.userId));
+      allow update: if isValidBooking(request.resource.data) 
+                    && (resource.data.userId == null 
+                        || resource.data.userId == 'anonymous' 
+                        || isOwner(resource.data.userId));
+      allow delete: if false; // Deletions must go through management or cancel status
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow get: if true; // Allow lookup by order ID
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidOrder(request.resource.data)
+                    && (request.resource.data.userId == null 
+                        || request.resource.data.userId == 'anonymous' 
+                        || isOwner(request.resource.data.userId));
+      allow update: if isValidOrder(request.resource.data)
+                    && (resource.data.userId == null 
+                        || resource.data.userId == 'anonymous' 
+                        || isOwner(resource.data.userId));
+      allow delete: if false;
+    }
+
+    // Feedbacks & Ratings
+    match /feedbacks/{feedbackId} {
+      allow read: if true; // Allow showing customer feedback and testimonials
+      allow create: if isValidFeedback(request.resource.data)
+                    && (request.resource.data.userId == null 
+                        || request.resource.data.userId == 'anonymous' 
+                        || isOwner(request.resource.data.userId));
+      allow update: if false; // Ratings are immutable after submission
+      allow delete: if false;
+    }
+  }
+}

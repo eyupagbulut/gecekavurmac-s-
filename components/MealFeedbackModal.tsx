@@ -204,7 +204,7 @@ export const MealFeedbackModal: React.FC = () => {
             <div className="space-y-2">
               <h3 className="text-2xl font-black text-gray-900">Değerlendirmeniz Alındı!</h3>
               <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                Kavurmacı Kadıköy lezzet standartlarını geliştirmemize yardımcı olduğunuz için yürekten teşekkür ederiz.
+                Kavurmacı Fikirtepe lezzet standartlarını geliştirmemize yardımcı olduğunuz için yürekten teşekkür ederiz.
               </p>
             </div>
 

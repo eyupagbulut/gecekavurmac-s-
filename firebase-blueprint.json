@@ -1,0 +1,158 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing loyalty progress and tier info.",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "points": {
+          "type": "number"
+        },
+        "totalEarned": {
+          "type": "number"
+        },
+        "membershipTier": {
+          "type": "string",
+          "enum": ["Bronz", "Gümüş", "Altın", "Platin"]
+        },
+        "history": {
+          "type": "array"
+        },
+        "updatedAt": {
+          "type": "number"
+        }
+      },
+      "required": ["fullName", "phone", "points", "totalEarned", "membershipTier", "history"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Table booking reservation details.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "date": {
+          "type": "string"
+        },
+        "timeSlot": {
+          "type": "string"
+        },
+        "guestsCount": {
+          "type": "number"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Beklemede", "Onaylandı", "İptal Edildi"]
+        },
+        "createdAt": {
+          "type": "number"
+        }
+      },
+      "required": ["fullName", "phone", "date", "timeSlot", "guestsCount", "status", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Restaurant food order placement details.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array"
+        },
+        "total": {
+          "type": "number"
+        },
+        "details": {
+          "type": "object"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Alındı", "Hazırlanıyor", "Yolda", "Teslim Edildi"]
+        },
+        "createdAt": {
+          "type": "number"
+        }
+      },
+      "required": ["items", "total", "details", "status", "createdAt"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "Meal feedback and rating details.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "feedbackText": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "highlights": {
+          "type": "array"
+        },
+        "itemsFeedback": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "number"
+        }
+      },
+      "required": ["orderId", "rating", "feedbackText", "highlights", "itemsFeedback", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile with loyalty rewards details"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Table reservation details"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Food order details"
+    },
+    "/feedbacks/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "Feedback and ratings given by users"
+    }
+  }
+}

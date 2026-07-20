@@ -4,22 +4,32 @@ import { useMenu } from '../context/MenuContext';
 
 export const WhatsAppButton: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(true);
-  const { cartItems } = useMenu();
+  const { cartItems, settings } = useMenu();
   
-  // High-quality Turkish WhatsApp business message link
-  const whatsappNumber = "905525467058"; // Kavurmacı Kadıköy hotline number
+  // Format phone number to clean WhatsApp format (numeric only)
+  const getFormattedNumber = () => {
+    let raw = settings.phone.replace(/\D/g, ''); // strip non-numeric
+    if (raw.startsWith('0')) {
+      raw = '90' + raw.substring(1);
+    } else if (!raw.startsWith('90') && raw.length === 10) {
+      raw = '90' + raw;
+    }
+    return raw || "905525467058";
+  };
+
+  const whatsappNumber = getFormattedNumber();
   
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  let sampleMessage = "Merhaba Kavurmacı Kadıköy, menü ve siparişler hakkında bir sorum vardı.";
+  let sampleMessage = `Merhaba ${settings.restaurantName}, menü ve siparişler hakkında bir sorum vardı.`;
   
   if (cartItems.length > 0) {
     const itemsText = cartItems
       .map(item => `• ${item.quantity} adet ${item.name} (${item.weight || 'Porsiyon'}) - Tekil: ${item.price} ₺ (Tutar: ${item.price * item.quantity} ₺)`)
       .join('\n');
     
-    sampleMessage = `Merhaba Kavurmacı Kadıköy! 🥩\n\nSepetimdeki şu lezzetleri doğrudan WhatsApp üzerinden sipariş vermek istiyorum:\n\n${itemsText}\n\n*Toplam Tutar:* ${totalAmount} ₺\n\nSipariş Onayı ve teslimat detayı için yardımcı olabilir misiniz?`;
+    sampleMessage = `Merhaba ${settings.restaurantName}! 🥩\n\nSepetimdeki şu lezzetleri doğrudan WhatsApp üzerinden sipariş vermek istiyorum:\n\n${itemsText}\n\n*Toplam Tutar:* ${totalAmount} ₺\n\nSipariş Onayı ve teslimat detayı için yardımcı olabilir misiniz?`;
   }
 
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(sampleMessage)}`;

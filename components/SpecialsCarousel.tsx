@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMenu } from '../context/MenuContext';
 import { ChevronLeft, ChevronRight, Sparkles, Percent, ShoppingBag, Flame } from 'lucide-react';
-import PILAV_KAVURMA_IMG from '../src/assets/images/pilav_kavurma_1781715948644.jpg';
-import EKMEK_ARASI_IMG from '../src/assets/images/ekmek_arasi_kavurma_1781715918742.jpg';
-import MENU_DRINK_IMG from '../src/assets/images/menu_drink_1781715963995.jpg';
+import PILAV_KAVURMA_IMG from '../src/assets/images/pilav_ustu_kavurma_new_v2_1784501731312.jpg';
+import EKMEK_ARASI_IMG from '../src/assets/images/ekmek_arasi_no_peppers_1784501761947.jpg';
+import MENU_DRINK_IMG from '../src/assets/images/pilav_ustu_kavurma_icecek_1784498357074.jpg';
 
 interface SpecialItem {
   id: string;
@@ -17,6 +17,8 @@ interface SpecialItem {
   badge: string;
   image: string;
   accentColor: string;
+  calories?: number;
+  protein?: number;
 }
 
 const SPECIALS: SpecialItem[] = [
@@ -31,7 +33,9 @@ const SPECIALS: SpecialItem[] = [
     discountedPrice: 765, // 10% Off
     badge: '%10 İNDİRİM',
     image: MENU_DRINK_IMG,
-    accentColor: 'from-orange-600 to-amber-500'
+    accentColor: 'from-orange-600 to-amber-500',
+    calories: 1020,
+    protein: 61
   },
   {
     id: 'special-ek-150',
@@ -44,20 +48,24 @@ const SPECIALS: SpecialItem[] = [
     discountedPrice: 495, // 10% Off
     badge: 'ÖĞLE ARASI ÖZEL',
     image: EKMEK_ARASI_IMG,
-    accentColor: 'from-brand-600 to-red-500'
+    accentColor: 'from-brand-600 to-red-500',
+    calories: 670,
+    protein: 51
   },
   {
     id: 'special-pk-150',
     productId: 'pilav-kavurma',
     variantId: 'pk-150',
     title: 'İmza Pilav Üstü Kavurma',
-    subtitle: 'Pilav Kavurma 150 gr',
+    subtitle: 'Pilav Üstü Kavurma 150 gr',
     description: 'Bol tereyağlı pilavla buluşan 150 gram yumuşacık esnaf usulü kavurma.',
     originalPrice: 650,
     discountedPrice: 585, // 10% Off
     badge: 'GÜNÜN YILDIZI',
     image: PILAV_KAVURMA_IMG,
-    accentColor: 'from-amber-600 to-yellow-500'
+    accentColor: 'from-amber-600 to-yellow-500',
+    calories: 750,
+    protein: 47
   }
 ];
 
@@ -121,7 +129,7 @@ export const SpecialsCarousel: React.FC = () => {
           </div>
           <div>
             <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-zinc-100 leading-tight">Günün Sıcak Fırsatları</h2>
-            <p className="text-xs text-gray-500 dark:text-zinc-400">Kavurmacı Kadıköy'den gün boyu geçerli kaçırılmayacak porsiyon indirimleri</p>
+            <p className="text-xs text-gray-500 dark:text-zinc-400">Kavurmacı Fikirtepe'den gün boyu geçerli kaçırılmayacak porsiyon indirimleri</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -178,7 +186,26 @@ export const SpecialsCarousel: React.FC = () => {
                     <div className="space-y-1">
                       <span className="text-xs font-semibold text-brand-600 leading-none block uppercase">GÜNÜN FIRSATI</span>
                       <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-zinc-100 leading-snug">{special.title}</h3>
-                      <p className="text-sm font-medium text-gray-600 dark:text-zinc-350">{special.subtitle}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium text-gray-600 dark:text-zinc-350">{special.subtitle}</p>
+                        {(special.calories || special.protein) && (
+                          <div className="flex gap-1.5 items-center">
+                            <span className="text-[10px] text-zinc-300 dark:text-zinc-600">•</span>
+                            {special.calories && (
+                              <span className="text-[10px] bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 font-semibold px-2 py-0.5 rounded-md flex items-center gap-0.5 border border-orange-100 dark:border-orange-900/40">
+                                <Flame size={10} className="text-orange-500" />
+                                {special.calories} kcal
+                              </span>
+                            )}
+                            {special.protein && (
+                              <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-md flex items-center gap-0.5 border border-emerald-100 dark:border-emerald-900/40">
+                                <span>🥩</span>
+                                {special.protein}g Protein
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <p className="text-gray-500 dark:text-zinc-400 text-xs md:text-sm leading-relaxed max-w-xl">{special.description}</p>
                   </div>

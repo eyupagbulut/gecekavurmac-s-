@@ -1,34 +1,49 @@
 import React from 'react';
 import { useMenu } from '../context/MenuContext';
 import { Product, CartItem, ProductVariant } from '../types';
-import { Plus } from 'lucide-react';
+import { Plus, Flame } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
+import KAVURMA_HERO_IMG from '../src/assets/images/sade_kavurma_new_1784500788937.jpg';
+import { LOGO_IMG } from '../constants';
 
 export const Hero: React.FC = () => {
   return (
-    <div className="relative h-[400px] w-full bg-gray-900 overflow-hidden flex items-center justify-center mb-8">
+    <div className="relative min-h-[460px] md:h-[480px] w-full bg-gray-950 overflow-hidden flex items-center justify-center mb-8 py-12">
       <div className="absolute inset-0 opacity-50">
         <img 
-          src="https://images.unsplash.com/photo-1574484284002-952d92456975?q=80&w=2000&auto=format&fit=crop" 
-          alt="Turkish Food Hero" 
-          className="w-full h-full object-cover"
+          src={KAVURMA_HERO_IMG} 
+          alt="Kavurmacı Fikirtepe Lezzetleri" 
+          className="w-full h-full object-cover scale-105 filter blur-[1px]"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent" />
       
-      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-        <span className="inline-block py-1 px-3 rounded-full bg-brand-500/20 border border-brand-500 text-brand-500 font-semibold text-sm mb-4 backdrop-blur-sm">
-          Sadece Fikirtepe & Dumlupınar'da
+      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto flex flex-col items-center">
+        {/* Gece Kavurmacısı Logo with professional background removal/blending */}
+        <div className="relative mb-6 group">
+          <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition-all duration-500" />
+          <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-amber-500/40 shadow-2xl bg-white flex items-center justify-center p-1">
+            <img 
+              src={LOGO_IMG} 
+              alt="Gece Kavurmacısı Logo" 
+              className="w-full h-full rounded-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </div>
+
+        <span className="inline-block py-1 px-3 rounded-full bg-brand-500/20 border border-brand-500/40 text-brand-400 font-semibold text-sm mb-4 backdrop-blur-sm">
+          Sadece Fikirtepe & Merdivenköy
         </span>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight">
           Gerçek <span className="text-brand-500">Kavurma</span> Lezzeti
         </h1>
-        <p className="text-gray-300 text-lg md:text-xl mb-8 leading-relaxed">
-          Tane tane pilav, lokum gibi kavurma. <br/>Kadıköy'ün en iyi esnaf lezzeti şimdi kapınızda.
+        <p className="text-gray-300 text-lg md:text-xl mb-8 leading-relaxed max-w-xl">
+          Tane tane tereyağlı pilav, lokum kıvamında enfes kavurma. <br/>Gece Kavurmacısı kalitesiyle kapınızda.
         </p>
         <button 
           onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}
-          className="bg-brand-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-brand-700 transition shadow-lg shadow-brand-500/30"
+          className="bg-brand-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-brand-700 transition-all duration-300 shadow-lg shadow-brand-500/30 hover:scale-105"
         >
           Sipariş Ver
         </button>
@@ -123,9 +138,29 @@ const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void 
       </div>
       
       <div className="p-5 flex-1 flex flex-col">
-        <div className="mb-4 flex-1">
+        <div className="mb-3 flex-1">
           <h3 className="text-xl font-bold text-gray-800 dark:text-zinc-100 mb-2">{product.name}</h3>
-          <p className="text-gray-500 dark:text-zinc-400 text-sm leading-relaxed line-clamp-2">{product.description}</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm leading-relaxed line-clamp-2 mb-3">{product.description}</p>
+          
+          {selectedVariant && (selectedVariant.calories || selectedVariant.protein) && (
+            <div className="py-2 px-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl flex items-center justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-100 dark:border-zinc-800/60 shadow-sm animate-fade-in">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold">Besin Değerleri</span>
+              <div className="flex gap-2">
+                {selectedVariant.calories && (
+                  <span className="flex items-center gap-1 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-lg border border-orange-100 dark:border-orange-900/40">
+                    <Flame size={12} className="text-orange-500" />
+                    {selectedVariant.calories} kcal
+                  </span>
+                )}
+                {selectedVariant.protein && (
+                  <span className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
+                    <span className="text-emerald-500 text-[11px]">🥩</span>
+                    {selectedVariant.protein}g Protein
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">

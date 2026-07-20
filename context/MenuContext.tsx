@@ -1,6 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { Product, CartItem, SalesReport, ActiveOrder, OrderStatus, OrderDetails, LoyaltyProfile, LoyaltyReward, LoyaltyHistoryItem, PastOrder, MealRating, Toast, TableBooking } from '../types';
+import { Product, CartItem, SalesReport, ActiveOrder, OrderStatus, OrderDetails, LoyaltyProfile, LoyaltyReward, LoyaltyHistoryItem, PastOrder, MealRating, Toast, TableBooking, RestaurantSettings } from '../types';
 import { INITIAL_MENU } from '../constants';
+import { 
+  isFirebaseConfigured, 
+  auth, 
+  loginWithGoogle as fLoginWithGoogle, 
+  logoutUser as fLogoutUser, 
+  saveLoyaltyProfileToDb, 
+  getLoyaltyProfileFromDb, 
+  saveBookingToDb, 
+  saveOrderToDb, 
+  saveFeedbackToDb 
+} from '../src/services/firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 interface MenuContextType {
   products: Product[];
@@ -9,6 +21,11 @@ interface MenuContextType {
   removeFromCart: (productId: string, variantId: string) => void;
   updateCartQuantity: (productId: string, variantId: string, delta: number) => void;
   clearCart: () => void;
+  
+  firebaseUser: FirebaseUser | null;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
+  isFirebaseActive: boolean;
   
   // Custom tracking
   activeOrder: ActiveOrder | null;
@@ -61,6 +78,10 @@ interface MenuContextType {
   bookings: TableBooking[];
   addBooking: (booking: Omit<TableBooking, 'id' | 'status' | 'createdAt'>) => void;
   cancelBooking: (id: string) => void;
+
+  // Restaurant Settings
+  settings: RestaurantSettings;
+  updateSettings: (newSettings: RestaurantSettings) => void;
 }
 
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
@@ -69,6 +90,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [products, setProducts] = useState<Product[]>(INITIAL_MENU);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const isFirebaseActive = isFirebaseConfigured;
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
@@ -96,10 +120,53 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  useEffect(() => {
+    if (isFirebaseActive && auth) {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        setFirebaseUser(user);
+        if (user) {
+          try {
+            const dbProfile = await getLoyaltyProfileFromDb(user.uid);
+            if (dbProfile) {
+              setLoyaltyProfile(dbProfile);
+              localStorage.setItem('kavurmaci_loyalty_profile', JSON.stringify(dbProfile));
+            } else {
+              // Create a default loyalty profile for Google Sign-In user
+              const welcomeHistory: LoyaltyHistoryItem[] = [
+                {
+                  id: `LH-${Math.floor(1000 + Math.random() * 9000).toString()}`,
+                  type: 'kazanç',
+                  amount: 50,
+                  description: 'Google ile İlk Giriş Hediye Puanı 🎁',
+                  timestamp: Date.now()
+                }
+              ];
+              const profile: LoyaltyProfile = {
+                fullName: user.displayName || 'Google Kullanıcısı',
+                phone: '0555 000 0000',
+                email: user.email || '',
+                points: 50,
+                totalEarned: 50,
+                history: welcomeHistory,
+                membershipTier: 'Bronz'
+              };
+              setLoyaltyProfile(profile);
+              localStorage.setItem('kavurmaci_loyalty_profile', JSON.stringify(profile));
+              await saveLoyaltyProfileToDb(user.uid, profile);
+            }
+          } catch (e) {
+            console.error("Error loading profile from Firebase:", e);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [isFirebaseActive]);
+
   const [report, setReport] = useState<SalesReport>({
     totalOrders: 124, // Mock initial data
     totalRevenue: 45200,
-    topSellingItem: 'Pilav Kavurma'
+    topSellingItem: 'Pilav Üstü Kavurma'
   });
 
   const INITIAL_REWARDS: LoyaltyReward[] = [
@@ -142,7 +209,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const addBooking = (newBookingData: Omit<TableBooking, 'id' | 'status' | 'createdAt'>) => {
-    const bookingId = `MASA-${Math.floor(100 + Math.random() * 900).toString()}`;
+    const bookingId = `KVR-${Math.floor(1000 + Math.random() * 9000).toString()}`;
     const newBooking: TableBooking = {
       ...newBookingData,
       id: bookingId,
@@ -155,6 +222,13 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('kavurmaci_table_bookings', JSON.stringify(updated));
       return updated;
     });
+
+    if (isFirebaseActive) {
+      saveBookingToDb({
+        ...newBooking,
+        userId: firebaseUser ? firebaseUser.uid : 'anonymous'
+      });
+    }
 
     addToast({
       title: "Rezervasyon Alındı! 📝",
@@ -203,6 +277,13 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('kavurmaci_submitted_ratings', JSON.stringify(updated));
       return updated;
     });
+
+    if (isFirebaseActive) {
+      saveFeedbackToDb({
+        ...rating,
+        userId: firebaseUser ? firebaseUser.uid : 'anonymous'
+      });
+    }
 
     // Add bonus loyalty points
     if (loyaltyProfile) {
@@ -590,6 +671,13 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveOrder(order);
     localStorage.setItem('kavurmaci_active_order', JSON.stringify(order));
 
+    if (isFirebaseActive) {
+      saveOrderToDb({
+        ...order,
+        userId: firebaseUser ? firebaseUser.uid : 'anonymous'
+      });
+    }
+
     // Toast notification
     addToast({
       title: "Siparişiniz Alındı! 🥩",
@@ -598,7 +686,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       duration: 6000
     });
 
-    triggerNativeNotification("Kavurmacı Kadıköy 🥩", `Siparişiniz ${orderId} başarıyla alındı!`);
+    triggerNativeNotification("Kavurmacı Fikirtepe 🥩", `Siparişiniz ${orderId} başarıyla alındı!`);
     playNotificationSound('Alındı');
 
     // Award loyalty points (10% of total order value!)
@@ -726,6 +814,78 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
+  const [settings, setSettings] = useState<RestaurantSettings>(() => {
+    try {
+      const saved = localStorage.getItem('kavurmaci_restaurant_settings');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn("Could not load restaurant settings", e);
+    }
+    return {
+      restaurantName: "Gece Kavurmacısı Fikirtepe",
+      phone: "0552 546 70 58",
+      address: "Yenitepe Business İstanbul",
+      workingHoursWeekday: "07:00 - 00:00",
+      workingHoursSunday: "Kapalı"
+    };
+  });
+
+  const updateSettings = (newSettings: RestaurantSettings) => {
+    setSettings(newSettings);
+    try {
+      localStorage.setItem('kavurmaci_restaurant_settings', JSON.stringify(newSettings));
+    } catch (e) {
+      console.warn("Could not save restaurant settings", e);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      const user = await fLoginWithGoogle();
+      if (user) {
+        addToast({
+          title: "Giriş Başarılı! 👋",
+          message: `Hoş geldiniz, ${user.displayName}!`,
+          type: 'success'
+        });
+      }
+    } catch (err: any) {
+      addToast({
+        title: "Giriş Başarısız ❌",
+        message: err?.message || "Google ile giriş yapılırken bir hata oluştu.",
+        type: 'error'
+      });
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fLogoutUser();
+      setFirebaseUser(null);
+      setLoyaltyProfile(null);
+      localStorage.removeItem('kavurmaci_loyalty_profile');
+      localStorage.removeItem('kavurmaci_past_orders');
+      addToast({
+        title: "Çıkış Yapıldı 🚪",
+        message: "Oturumunuz başarıyla kapatılmıştır.",
+        type: 'success'
+      });
+    } catch (err: any) {
+      addToast({
+        title: "Hata ❌",
+        message: "Çıkış yapılırken bir hata oluştu.",
+        type: 'error'
+      });
+    }
+  };
+
+  // Automatically sync loyalty profile changes to Firestore
+  useEffect(() => {
+    if (isFirebaseActive && firebaseUser && loyaltyProfile) {
+      saveLoyaltyProfileToDb(firebaseUser.uid, loyaltyProfile);
+    }
+  }, [loyaltyProfile, firebaseUser, isFirebaseActive]);
+
   return (
     <MenuContext.Provider value={{
       products,
@@ -734,6 +894,10 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       removeFromCart,
       updateCartQuantity,
       clearCart,
+      firebaseUser,
+      loginWithGoogle,
+      logout,
+      isFirebaseActive,
       activeOrder,
       placeOrder,
       cancelActiveOrder,
@@ -765,7 +929,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       recordSale,
       bookings,
       addBooking,
-      cancelBooking
+      cancelBooking,
+      settings,
+      updateSettings
     }}>
       {children}
     </MenuContext.Provider>

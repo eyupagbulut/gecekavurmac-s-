@@ -13,6 +13,7 @@ import { OrderHistoryModal } from './components/OrderHistoryModal';
 import { MenuProvider, useMenu } from './context/MenuContext';
 import { AdminPanel, AdminLogin } from './components/Admin';
 import { ToastOverlay } from './components/ToastOverlay';
+import { LOGO_IMG } from './constants';
 
 // Sub-component to consume context (since App creates the provider)
 const AppContent: React.FC = () => {
@@ -60,12 +61,17 @@ const AppContent: React.FC = () => {
       <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm dark:shadow-zinc-950/20 py-3 border-b border-transparent dark:border-zinc-800/50' : 'bg-transparent py-5'}`}>
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-lg ${scrolled ? 'bg-brand-600 text-white' : 'bg-white text-brand-600'}`}>
-              <MenuIcon size={24} />
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-amber-500/30 flex items-center justify-center p-0.5 bg-white shadow-md shrink-0">
+              <img 
+                src={LOGO_IMG} 
+                alt="Gece Kavurmacısı Logo" 
+                className="w-full h-full rounded-full object-cover mix-blend-multiply" 
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div className="flex flex-col shrink-0">
-               <h1 className={`font-bold text-xl leading-none ${scrolled ? 'text-gray-900 dark:text-zinc-100' : 'text-white'}`}>Kavurmacı</h1>
-               <span className={`text-xs ${scrolled ? 'text-gray-500 dark:text-zinc-400' : 'text-white/80'}`}>Kadıköy</span>
+               <h1 className={`font-bold text-xl leading-none ${scrolled ? 'text-gray-900 dark:text-zinc-100' : 'text-white'}`}>Gece Kavurmacısı</h1>
+               <span className={`text-xs font-semibold ${scrolled ? 'text-gray-500 dark:text-zinc-400' : 'text-white/80'}`}>Fikirtepe</span>
             </div>
           </div>
 
@@ -99,7 +105,7 @@ const AppContent: React.FC = () => {
           <div className="flex items-center gap-4">
              <div className={`hidden md:flex items-center gap-1 text-sm font-medium ${scrolled ? 'text-gray-600' : 'text-white/90'}`}>
                 <MapPin size={16} />
-                <span>Fikirtepe & Dumlupınar</span>
+                <span>Yenitepe Business İstanbul</span>
              </div>
 
              <div className="flex items-center gap-2">
@@ -206,14 +212,14 @@ const AppContent: React.FC = () => {
       <footer className="bg-gray-900 text-gray-400 py-12 mt-12">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8 text-sm">
           <div>
-            <h3 className="text-white font-bold text-lg mb-4">Kavurmacı Kadıköy</h3>
+            <h3 className="text-white font-bold text-lg mb-4">Kavurmacı Fikirtepe</h3>
             <p>Geleneksel lezzetleri modern hizmet anlayışıyla kapınıza getiriyoruz.</p>
           </div>
           <div>
             <h4 className="text-white font-bold mb-4">Hizmet Bölgeleri</h4>
             <ul className="space-y-2">
               <li>Fikirtepe Mahallesi</li>
-              <li>Dumlupınar Mahallesi</li>
+              <li>Merdivenköy Mahallesi</li>
             </ul>
           </div>
           <div>
@@ -247,12 +253,12 @@ const AppContent: React.FC = () => {
           </div>
           <div>
             <h4 className="text-white font-bold mb-4">İletişim</h4>
-            <p>0216 555 00 00</p>
-            <p>info@kavurmacikadikoy.com</p>
+            <p>0552 546 70 58</p>
+            <p>info@kavurmacifikirtepe.com</p>
           </div>
         </div>
         <div className="text-center mt-8 pt-8 border-t border-gray-800 text-xs">
-          © 2024 Kavurmacı Kadıköy. Tüm hakları saklıdır.
+          © 2024 Kavurmacı Fikirtepe. Tüm hakları saklıdır.
         </div>
       </footer>
 

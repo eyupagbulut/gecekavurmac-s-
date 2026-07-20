@@ -2,6 +2,8 @@ export interface ProductVariant {
   weight: string; // e.g., "100 GR"
   price: number;
   id: string;
+  calories?: number;
+  protein?: number;
 }
 
 export interface Product {
@@ -38,7 +40,7 @@ export interface OrderDetails {
   phone: string;
   email?: string;
   address: string;
-  neighborhood: 'Fikirtepe' | 'Dumlupınar' | 'Diğer';
+  neighborhood: 'Fikirtepe' | 'Merdivenköy' | 'Diğer';
   note?: string;
   paymentMethod: PaymentMethod;
 }
@@ -133,5 +135,14 @@ export interface TableBooking {
   status: 'Beklemede' | 'Onaylandı' | 'İptal Edildi';
   createdAt: number;
 }
+
+export interface RestaurantSettings {
+  restaurantName: string;
+  phone: string;
+  address: string;
+  workingHoursWeekday: string;
+  workingHoursSunday: string;
+}
+
 
 

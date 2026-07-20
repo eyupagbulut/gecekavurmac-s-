@@ -44,7 +44,7 @@ const DeliveryRouteMap: React.FC<{ neighborhood: string; status: string; theme: 
   const [viewMode, setViewMode] = useState<'kroki' | 'gps'>('kroki');
 
   // Restaurant Coordinates (Kavurmacı Kadıköy - Fikirtepe Outlet)
-  const RESTAURANT = { lat: 40.9910, lng: 29.0550, name: "Kavurmacı Kadıköy" };
+  const RESTAURANT = { lat: 40.9910, lng: 29.0550, name: "Kavurmacı Fikirtepe" };
 
   // Calculate live distance when coords are available
   const currentDistance = userCoords 
@@ -600,7 +600,7 @@ export const OrderStatusTracker: React.FC = () => {
   const STEPS = [
     {
       title: 'Sipariş Alındı',
-      desc: 'Kavurmacı Kadıköy siparişinizi onayladı.',
+      desc: 'Kavurmacı Fikirtepe siparişinizi onayladı.',
       icon: CheckCircle,
       activeColor: 'text-green-500 bg-green-50 border-green-500',
       lineColor: 'border-green-500'
@@ -752,7 +752,7 @@ export const OrderStatusTracker: React.FC = () => {
             <div className="border-t border-gray-100 dark:border-zinc-800/80 pt-4 space-y-2 text-xs text-gray-600 dark:text-zinc-300">
               <div className="flex items-start gap-1.5">
                 <MapPin size={14} className="text-gray-450 dark:text-zinc-500 shrink-0 mt-0.5" />
-                <p><span className="font-semibold text-gray-800 dark:text-zinc-200">Adres:</span> {activeOrder.details.address}, {activeOrder.details.neighborhood} / Kadıköy</p>
+                <p><span className="font-semibold text-gray-800 dark:text-zinc-200">Adres:</span> {activeOrder.details.address}, {activeOrder.details.neighborhood} / Fikirtepe</p>
               </div>
               <div className="flex items-center gap-1.5">
                 <CreditCard size={14} className="text-gray-450 dark:text-zinc-500 shrink-0" />

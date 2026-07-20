@@ -236,7 +236,7 @@ const CheckoutModal: React.FC<{
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (details.neighborhood === 'Diğer') {
-      alert("Üzgünüz, sadece Fikirtepe ve Dumlupınar mahallelerine hizmet veriyoruz.");
+      alert("Üzgünüz, sadece Fikirtepe ve Merdivenköy mahallelerine hizmet veriyoruz.");
       return;
     }
     // Simulate API call and email delivery
@@ -293,7 +293,7 @@ const CheckoutModal: React.FC<{
                   <div className="bg-white rounded-xl shadow-inner border border-gray-200 overflow-hidden text-left max-w-lg mx-auto">
                     {/* Simulated Email Header metadata */}
                     <div className="bg-gray-900 text-white p-3 border-b text-[11px] font-mono space-y-1">
-                      <div><span className="text-gray-400">Kimden:</span> Kavurmacı Kadıköy &lt;siparis@kavurmacikadikoy.com&gt;</div>
+                      <div><span className="text-gray-400">Kimden:</span> Kavurmacı Fikirtepe &lt;siparis@kavurmacifikirtepe.com&gt;</div>
                       <div><span className="text-gray-400">Kime:</span> {details.fullName} &lt;{details.email}&gt;</div>
                       <div><span className="text-gray-400">Konu:</span> 🥩 Siparişiniz Alındı! Sıcak Kavurma Yola Çıkmaya Hazırlanıyor ({orderNum})</div>
                     </div>
@@ -304,7 +304,7 @@ const CheckoutModal: React.FC<{
                       {/* Brand Logo & Intro */}
                       <div className="text-center space-y-1">
                         <span className="text-3xl">🥩</span>
-                        <h1 className="text-lg font-bold text-gray-900 select-none">Kavurmacı Kadıköy</h1>
+                        <h1 className="text-lg font-bold text-gray-900 select-none">Kavurmacı Fikirtepe</h1>
                         <p className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold">Lezzet Onay Bildirimi</p>
                       </div>
 
@@ -353,7 +353,7 @@ const CheckoutModal: React.FC<{
                       <div className="grid grid-cols-2 gap-3 text-[11px] leading-relaxed">
                         <div className="bg-white p-3 rounded-lg border border-gray-100">
                           <span className="font-bold text-gray-700 block mb-1">📍 Teslimat Adresi:</span>
-                          <p className="text-gray-500">{details.address}, {details.neighborhood} / Kadıköy</p>
+                          <p className="text-gray-500">{details.address}, {details.neighborhood} / Fikirtepe</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg border border-gray-100">
                           <span className="font-bold text-gray-700 block mb-1">💳 Ödeme Tipi:</span>
@@ -365,7 +365,7 @@ const CheckoutModal: React.FC<{
                       {/* Footer notice in email */}
                       <div className="text-center pt-2 space-y-1 border-t border-dashed border-gray-200">
                         <p className="text-[10px] text-gray-400">
-                          Herhangi bir sorunuz için bize 0216 555 00 00 numaralı hattan ulaşabilirsiniz.
+                          Herhangi bir sorunuz için bize 0552 546 70 58 numaralı hattan ulaşabilirsiniz.
                         </p>
                         <p className="text-[9px] text-gray-400">
                           Bu bir simülasyon sistemidir. Gerçek bir servis bağlantısı kurulmamıştır.
@@ -422,7 +422,7 @@ const CheckoutModal: React.FC<{
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4">
           <div className="bg-orange-50 p-4 rounded-xl flex items-start gap-3 text-orange-800 text-sm mb-4">
             <MapPin className="shrink-0 mt-0.5" size={18} />
-            <p>Sadece Fikirtepe ve Dumlupınar mahallelerine teslimatımız vardır.</p>
+            <p>Sadece Fikirtepe ve Merdivenköy mahallelerine teslimatımız vardır.</p>
           </div>
 
           <div className="space-y-1">
