@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useMenu } from '../context/MenuContext';
 import { Product, CartItem, ProductVariant } from '../types';
-import { Plus, Flame } from 'lucide-react';
+import { Plus, Flame, Eye, Images, Sparkles, Utensils } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
 import KAVURMA_HERO_IMG from '../src/assets/images/sade_kavurma_new_1784500788937.jpg';
 import { LOGO_IMG } from '../constants';
+import { ProductGalleryModal } from './ProductGalleryModal';
 
 export const Hero: React.FC = () => {
   return (
@@ -54,6 +55,7 @@ export const Hero: React.FC = () => {
 
 export const ProductList: React.FC = () => {
   const { products, addToCart, searchQuery } = useMenu();
+  const [galleryProduct, setGalleryProduct] = useState<Product | null>(null);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -63,7 +65,14 @@ export const ProductList: React.FC = () => {
   return (
     <div id="menu" className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 border-l-4 border-brand-600 pl-4">Menümüz</h2>
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 border-l-4 border-brand-600 pl-4">
+            Menümüz
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1 pl-4">
+            Görselleri ve taptaze malzemeleri incelemek için ürün kartlarına veya "Galeri & Malzemeler" butonuna tıklayabilirsiniz.
+          </p>
+        </div>
         {searchQuery && (
           <p className="text-sm text-gray-500 dark:text-zinc-400 font-medium">
             <span className="text-brand-600 font-semibold">"{searchQuery}"</span> araması için {filteredProducts.length} lezzet bulundu
@@ -75,7 +84,11 @@ export const ProductList: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product, index) => (
             <ScrollReveal key={product.id} delay={(index % 3) * 100} className="h-full">
-              <ProductCard product={product} onAdd={addToCart} />
+              <ProductCard 
+                product={product} 
+                onAdd={addToCart} 
+                onOpenGallery={(p) => setGalleryProduct(p)}
+              />
             </ScrollReveal>
           ))}
         </div>
@@ -86,13 +99,24 @@ export const ProductList: React.FC = () => {
           <p className="text-gray-500 dark:text-zinc-400 text-sm">Farklı bir arama kelimesi girmeyi veya sepetinizi kontrol etmeyi deneyebilirsiniz!</p>
         </div>
       )}
+
+      {/* Product Gallery & Ingredients Modal */}
+      <ProductGalleryModal 
+        product={galleryProduct}
+        isOpen={!!galleryProduct}
+        onClose={() => setGalleryProduct(null)}
+      />
     </div>
   );
 };
 
 const BEST_SELLERS = ['pilav-kavurma', 'ekmek-arasi-kavurma'];
 
-const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void }> = ({ product, onAdd }) => {
+const ProductCard: React.FC<{ 
+  product: Product; 
+  onAdd: (item: CartItem) => void;
+  onOpenGallery: (product: Product) => void;
+}> = ({ product, onAdd, onOpenGallery }) => {
   // If product has no variants, create a dummy one or handle it gracefully. 
   // For this app, we assume all products have at least one variant.
   const [selectedVariant, setSelectedVariant] = React.useState<ProductVariant>(product.variants[0] || { id: 'default', weight: 'Standart', price: 0 });
@@ -102,7 +126,8 @@ const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void 
     setSelectedVariant(product.variants[0]);
   }, [product]);
 
-  const handleAdd = () => {
+  const handleAdd = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onAdd({
       productId: product.id,
       variantId: selectedVariant.id,
@@ -114,15 +139,22 @@ const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void 
     });
   };
 
+  const imageCount = (product.gallery && product.gallery.length > 0) ? product.gallery.length : 1;
+
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-zinc-800 overflow-hidden group flex flex-col h-full">
-      <div className="relative h-56 overflow-hidden">
+    <div 
+      onClick={() => onOpenGallery(product)}
+      className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-zinc-800 overflow-hidden group flex flex-col h-full cursor-pointer relative"
+    >
+      <div className="relative h-56 overflow-hidden bg-zinc-950">
         <img 
           src={product.image} 
           alt={product.name} 
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
+        
+        {/* Top badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
              {BEST_SELLERS.includes(product.id) && (
                  <span className="bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] uppercase font-black px-2.5 py-1.5 rounded-xl shadow-md tracking-wider flex items-center gap-1">
@@ -135,12 +167,55 @@ const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void 
                  </span>
              )}
         </div>
+
+        {/* Gallery Overlay Button on Card Hover */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 backdrop-blur-[2px]">
+          <span className="bg-white/90 dark:bg-zinc-900/90 text-gray-900 dark:text-white px-4 py-2 rounded-full font-bold text-xs shadow-xl flex items-center gap-2 transform group-hover:scale-105 transition-all">
+            <Images size={15} className="text-amber-500" />
+            Galeri & Malzemeler ({imageCount} Görsel)
+          </span>
+        </div>
+
+        {/* Gallery Badge on Card Top Right */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenGallery(product);
+          }}
+          className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 backdrop-blur-md text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg transition-transform hover:scale-105"
+          title="Galeri ve Malzemeleri Gör"
+        >
+          <Images size={12} className="text-amber-400" />
+          <span>{imageCount} Foto</span>
+        </button>
       </div>
       
       <div className="p-5 flex-1 flex flex-col">
         <div className="mb-3 flex-1">
-          <h3 className="text-xl font-bold text-gray-800 dark:text-zinc-100 mb-2">{product.name}</h3>
-          <p className="text-gray-500 dark:text-zinc-400 text-sm leading-relaxed line-clamp-2 mb-3">{product.description}</p>
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <h3 
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenGallery(product);
+              }}
+              className="text-xl font-bold text-gray-800 dark:text-zinc-100 group-hover:text-brand-600 transition-colors"
+            >
+              {product.name}
+            </h3>
+            <span 
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenGallery(product);
+              }}
+              className="text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-md border border-amber-200/60 dark:border-amber-900/40 font-bold shrink-0 flex items-center gap-1 hover:underline cursor-pointer"
+            >
+              <Eye size={12} /> Detay
+            </span>
+          </div>
+
+          <p className="text-gray-500 dark:text-zinc-400 text-sm leading-relaxed line-clamp-2 mb-3">
+            {product.description}
+          </p>
           
           {selectedVariant && (selectedVariant.calories || selectedVariant.protein) && (
             <div className="py-2 px-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl flex items-center justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-100 dark:border-zinc-800/60 shadow-sm animate-fade-in">
@@ -166,11 +241,14 @@ const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void 
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Porsiyon Seçimi</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
               {product.variants.map(variant => (
                 <button
                   key={variant.id}
-                  onClick={() => setSelectedVariant(variant)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedVariant(variant);
+                  }}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
                     selectedVariant?.id === variant.id
                       ? 'bg-brand-50 dark:bg-brand-950/20 border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-400 ring-1 ring-brand-500'
@@ -189,13 +267,27 @@ const ProductCard: React.FC<{ product: Product; onAdd: (item: CartItem) => void 
               <span className="text-2xl font-bold text-gray-900 dark:text-zinc-50">{selectedVariant?.price || 0} ₺</span>
             </div>
             
-            <button 
-              onClick={handleAdd}
-              className="bg-gray-900 dark:bg-zinc-850 dark:hover:bg-brand-600 text-white p-3 rounded-xl hover:bg-brand-600 transition-colors active:scale-95 flex items-center gap-2 group/btn"
-            >
-              <Plus size={18} className="group-hover/btn:rotate-90 transition-transform" />
-              <span className="font-medium">Ekle</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenGallery(product);
+                }}
+                className="bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 px-3 py-2.5 rounded-xl font-medium text-xs transition-colors flex items-center gap-1.5"
+                title="Detaylı İncele ve Galeri"
+              >
+                <Eye size={15} />
+                <span>İncele</span>
+              </button>
+
+              <button 
+                onClick={handleAdd}
+                className="bg-gray-900 dark:bg-zinc-850 dark:hover:bg-brand-600 text-white p-3 rounded-xl hover:bg-brand-600 transition-colors active:scale-95 flex items-center gap-2 group/btn"
+              >
+                <Plus size={18} className="group-hover/btn:rotate-90 transition-transform" />
+                <span className="font-medium">Ekle</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

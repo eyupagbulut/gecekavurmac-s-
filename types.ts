@@ -11,6 +11,9 @@ export interface Product {
   name: string;
   description: string;
   image: string;
+  gallery?: string[];
+  ingredients?: string[];
+  ingredientStory?: string;
   category: 'pilav' | 'ekmek' | 'porsiyon' | 'menu';
   variants: ProductVariant[];
 }

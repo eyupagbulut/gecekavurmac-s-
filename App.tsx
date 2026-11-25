@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, MapPin, Menu as MenuIcon, UserCog, Search, X, Award, History, Sun, Moon } from 'lucide-react';
+import { ShoppingBag, MapPin, Menu as MenuIcon, UserCog, Search, X, Award, History, Sun, Moon, Smartphone, QrCode } from 'lucide-react';
 import { CartDrawer } from './components/Cart';
 import { Hero, ProductList } from './components/Store';
 import { SpecialsCarousel } from './components/SpecialsCarousel';
@@ -10,6 +10,8 @@ import { WhatsAppButton } from './components/WhatsAppButton';
 import { LoyaltySystem } from './components/LoyaltySystem';
 import { BookATable } from './components/BookATable';
 import { OrderHistoryModal } from './components/OrderHistoryModal';
+import { AppDownloadModal } from './components/AppDownloadModal';
+import { AppDownloadSection } from './components/AppDownloadSection';
 import { MenuProvider, useMenu } from './context/MenuContext';
 import { AdminPanel, AdminLogin } from './components/Admin';
 import { ToastOverlay } from './components/ToastOverlay';
@@ -20,6 +22,7 @@ const AppContent: React.FC = () => {
   const { cartItems, searchQuery, setSearchQuery, loyaltyProfile, theme, toggleTheme } = useMenu();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
   // Admin State
@@ -109,17 +112,32 @@ const AppContent: React.FC = () => {
              </div>
 
              <div className="flex items-center gap-2">
+               {/* App Download Button */}
+               <button
+                 onClick={() => setIsDownloadModalOpen(true)}
+                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all duration-300 hover:scale-105 ${
+                   scrolled 
+                     ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200' 
+                     : 'bg-amber-500/30 text-white hover:bg-amber-500/50 border border-amber-300/40 backdrop-blur-md'
+                 }`}
+                 title="App Store, Google Play, PC Yükleme & QR Kod"
+               >
+                 <Smartphone size={15} className="text-amber-500 shrink-0 animate-pulse" />
+                 <span className="hidden sm:inline">Uygulamayı İndir / QR</span>
+                 <span className="sm:hidden">İndir / QR</span>
+               </button>
+
                {/* Order History Action */}
                <button
                  onClick={() => setIsHistoryOpen(true)}
-                 className={`p-3 rounded-full transition-colors relative hover:scale-105 duration-300 ${
+                 className={`p-2.5 rounded-full transition-colors relative hover:scale-105 duration-300 ${
                    scrolled 
                      ? 'text-gray-500 hover:text-gray-900' 
                      : 'text-white/70 hover:text-white'
                  }`}
                  title="Sipariş Geçmişim"
                >
-                 <History size={20} />
+                 <History size={19} />
                </button>
 
                {/* Theme Toggle Button */}
@@ -207,6 +225,7 @@ const AppContent: React.FC = () => {
         <ProductList />
         <BookATable />
         <LoyaltySystem />
+        <AppDownloadSection onOpenModal={() => setIsDownloadModalOpen(true)} />
       </main>
 
       <footer className="bg-gray-900 text-gray-400 py-12 mt-12">
@@ -249,12 +268,21 @@ const AppContent: React.FC = () => {
                   ⭐ Lezzet Kartı & Sadakat
                 </button>
               </li>
+              <li>
+                <button 
+                  onClick={() => setIsDownloadModalOpen(true)}
+                  className="hover:text-amber-400 text-amber-300 font-semibold transition-colors text-left flex items-center gap-1.5 cursor-pointer"
+                >
+                  📱 Mobil & PC Uygulaması (QR)
+                </button>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4">İletişim</h4>
+            <h4 className="text-white font-bold mb-4">İletişim & Mobil Link</h4>
             <p>0552 546 70 58</p>
             <p>info@kavurmacifikirtepe.com</p>
+            <p className="text-xs text-amber-400 font-semibold mt-2">gecekavurmacisi.com.tr</p>
           </div>
         </div>
         <div className="text-center mt-8 pt-8 border-t border-gray-800 text-xs">
@@ -267,6 +295,10 @@ const AppContent: React.FC = () => {
         isOpen={isHistoryOpen} 
         onClose={() => setIsHistoryOpen(false)} 
         onOpenCart={() => setIsCartOpen(true)}
+      />
+      <AppDownloadModal 
+        isOpen={isDownloadModalOpen} 
+        onClose={() => setIsDownloadModalOpen(false)} 
       />
       <OrderStatusTracker />
       <MealFeedbackModal />
